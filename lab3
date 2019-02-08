@@ -1,0 +1,62 @@
+ruleset wyovn_base {
+  meta {
+    shares __testing,
+    process_heartbeat
+  }
+  global {
+    __testing = { "queries":
+      [ { "name": "__testing" }
+      //, { "name": "entry", "args": [ "key" ] }
+      ] , "events":
+      
+      [ { "domain": "wovyn", "type": "heartbeat","attrs":["generic_thing"] }
+      //, { "domain": "d2", "type": "t2", "attrs": [ "a1", "a2" ] }
+      ]
+    }
+    
+    temperature_threshold = 85
+    
+     txt = defaction() {
+     
+      event:send({"eci":"FURPSPGhVg1of8yrZfyoUK", "eid":"cjrvkcmq000140em9lpbjlbbp ", "domain":"test", "type":"new_message", "attrs" : {"to":"+19188070495", "from":"+19182489075", "message":"It's to HOT!HOT!HOT!"}}, host="http://localhost:8080")
+    }
+  }
+  
+  rule process_heartbeat {
+    select when wovyn heartbeat where event:attr("generic_thing") != null
+    
+    send_directive("say", {"something": "Wovyn Heartbeat works!"})
+    fired{
+      
+    raise wovyn event "new_temperature_reading"
+      attributes {"temperature": event:attr("generic_thing"), "timestamp": time:new("083023Z")}
+      
+    }
+  }
+  
+  rule find_high_temps {
+    select when wovyn new_temperature_reading where event:attr("temperature") > 85
+    
+    pre{
+     
+      currentTemp = event:attr("temperature").klog("temperature: ") 
+    }
+    send_directive("say", {"something": "There was a high temp Violation!"})
+     fired{
+      
+     raise wovyn event "threshold_violation"
+       attributes event:attrs
+      
+    } 
+    
+  }
+  
+  rule threshold_notification  {
+    select when wovyn threshold_violation
+    send_directive("say", {"something": "message has been sent!"})
+    //txt()
+    
+  }
+  
+  
+}
