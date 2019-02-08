@@ -35,7 +35,7 @@ ruleset wyovn_base {
   }
   
   rule find_high_temps {
-    select when wovyn new_temperature_reading where event:attr("temperature") > 85
+    select when wovyn new_temperature_reading where event:attr("temperature") > temperature_threshold
     
     pre{
      
