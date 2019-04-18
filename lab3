@@ -1,5 +1,10 @@
 ruleset wyovn_base {
   meta {
+    use module io.picolabs.lesson_keys
+    use module io.picolabs.twilio_v2 alias twilio with 
+             account_sid = keys:twilio{"account_sid"}
+             auth_token =  keys:twilio{"auth_token"}
+  
     shares __testing,
     process_heartbeat
   }
@@ -18,7 +23,9 @@ ruleset wyovn_base {
     
      txt = defaction() {
      
-      event:send({"eci":"FURPSPGhVg1of8yrZfyoUK", "eid":"cjrvkcmq000140em9lpbjlbbp ", "domain":"test", "type":"new_message", "attrs" : {"to":"+19188070495", "from":"+19182489075", "message":"It's to HOT!HOT!HOT!"}}, host="http://localhost:8080")
+      twilio:send_sms(9188070495,
+                    19182489075,
+                   "It's to HOT!HOT!HOT!")
     }
   }
   
